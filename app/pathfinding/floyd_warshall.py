@@ -1,4 +1,4 @@
-from graph_constructor import Graph
+from pathfinding.graph_constructor import Graph
 
 class FloydWarshallGraph(Graph):
     def floyd_warshall(self):
