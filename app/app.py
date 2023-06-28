@@ -1,8 +1,13 @@
 
-from flask import Flask
+from flask import Flask, jsonify
+import requests
 from pathfinding.graph_constructor import Graph
 from pathfinding.depth_first_search import DFSGraph
 from pathfinding.dijkstra import DijkstraGraph
+from pathfinding.floyd_warshall import FloydWarshallGraph
+from pathfinding.breadth_first_search import BFSGraph
+from pathfinding.bellman_ford import BellmanGraph
+from pathfinding.a_star import AStarGraph
 # import ipdb
 
 app = Flask(__name__)
@@ -10,8 +15,14 @@ app = Flask(__name__)
 
 @app.route('/a_star')
 def a_star():
-    return 'Hello World'
+    graph = AStarGraph(4)
+    graph.add_edge(0, 1, 1)
+    graph.add_edge(0, 2, 2)
+    graph.add_edge(1, 2, 1)
+    graph.add_edge(1, 3, 2)
+    graph.add_edge(2, 3, 1)
 
+    return graph.a_star(0, 3)
 
 @app.route('/dijkstra')
 def dijkstra():
@@ -21,43 +32,62 @@ def dijkstra():
     graph.add_edge(0, 3, 4)
     graph.add_edge(1, 2, 6)
 
-    max_iterations = 100
-    distances = graph.dijkstra(start=0, max_iterations=max_iterations)
+    start = 0
+    distances = graph.dijkstra(start)
+    
+    
 
-    return str(distances)
+    return jsonify(distances)
 
 @app.route('/bellman_ford')
 def bellman_ford():
-    pass
+    graph = BellmanGraph(10)
+    graph.add_edge(0, 1, 2)
+    graph.add_edge(0, 2, 3)
+    graph.add_edge(1, 2, 4)
+    graph.add_edge(1, 3, 5)
+    graph.add_edge(2, 3, 6)
+    graph.add_edge(3, 4, 7)
+    graph.add_edge(4, 5, 8)
+    graph.add_edge(5, 6, 9)
+    graph.add_edge(6, 7, 10)
+
+    return jsonify(graph.bellman_ford(0))
+
+
+
 @app.route('/breadth_first_search')
 def breadth_first_search():
-    pass
+    graph = BFSGraph(4)
+    graph.add_edge(0, 1, 2)
+    graph.add_edge(0, 2, 3)
+    graph.add_edge(1, 2, 4)
+    graph.add_edge(2, 3, 1)
+    graph.add_edge(0, 3, 5)
+
+    return graph.breadth_first_search(0)
 
 
-
-def depth_first_search(graph, traversal_type):
-    if traversal_type == "post_order":
-        return DFSGraph(graph, root=0).dfs_post_order()
-    elif traversal_type == "pre_order":
-        return DFSGraph(graph, root=0).dfs_pre_order()
-    else: 
-        raise ValueError("Invalid traversal type")
-    
-
-@app.route('/depth_first_search/<traversal_type>')
-def dfs(traversal_type):
-    graph = DFSGraph(vertices=4, root=0)
+@app.route('/depth_first_search')
+def dfs():
+    graph = DFSGraph(vertices=4)
     graph.add_edge(0,1,1)
     graph.add_edge(1,2,3)
     graph.add_edge(2,3, 2)
 
-    return depth_first_search(graph, traversal_type)
+    return graph.dfs(0)
 
 
 @app.route('/floyd_warshall')
 def floyd_warshall():
-    pass
+    graph = FloydWarshallGraph(4)
+    graph.add_edge(0, 1, 2)
+    graph.add_edge(0, 2, 3)
+    graph.add_edge(1, 2, 4)
+    graph.add_edge(2, 3, 1)
+    graph.add_edge(0, 3, 5)
 
+    return graph.floyd_warshall()
 
 
 

@@ -1,19 +1,25 @@
-from .graph_constructor import Graph
+from pathfinding.graph_constructor import Graph
 
 class DijkstraGraph(Graph):
-    def dijkstra(self, start, max_depth=100):
-        distances = {node: float('inf') for node in self.graph} 
-        distances[start] = 0 
-        visited = set()
-        depth = 0
+    def dijkstra(self, start):
+        distances = {source: float('inf') for source in self.graph.keys()}
+        distances[start] = 0
 
-        while visited != set(self.graph) and depth < max_depth: 
-            u = min(distances, key=distances.get) 
-            visited.add(u)
+        # queue =[node for node in self.graph.keys()]
+        queue = list(self.graph.keys())
 
-            for v, weight in self.graph[u].items():
-                if v not in visited and distances[v] > distances[u] + weight:
-                    distances[v] = distances[u] + weight
+        while queue:
+            u = min(queue, key=lambda node: distances[node])
+            # queue.pop(0)
+            queue.remove(u)
 
-            depth += 1
-        return distances 
+            for v in self.neighbors(u):
+                # if v not in queue:
+                alt_path = distances[u] + self.graph[u][v]
+                if alt_path < distances[v]:
+                    distances[v] = alt_path
+
+        return distances    
+        
+
+        

@@ -1,40 +1,45 @@
-from graph_constructor import Graph
-import heapq
+from pathfinding.graph_constructor import Graph
+
 
 class AStarGraph(Graph):
-    def a_start(self, start, goal):
-        distances = {vertex: float("inf") for vertex in self.graph}
-        distances[start] = 0
-        open_list = []
+    def a_star(self, start, goal):
+        open_set = set([start])
         came_from = {}
-        current_cost = {start: 0}
 
-        heapq.heappush(open_list, (0, start))
+        known_score = {vertex: float('inf') for vertex in self.graph.keys()}
+        known_score[start] = 0
 
-        while open_list:
-            current, priority = heapq.heappop(open_list) 
+        heuristic_score = {vertex: float('inf') for vertex in self.graph.keys()}
+        heuristic_score[start] = self.heuristic(start, goal)
+       
+
+        while open_set:
+            current = min(open_set, key=lambda node: heuristic_score[node])
+            open_set.remove(current)
 
             if current == goal: 
-                path = [] 
-                while current != start: 
-                    path.append(current) 
-                    current = came_from[current] 
-                path.reverse()
-                return path 
+                return self.construct_path(came_from, current)
 
-            for neighbor, weight in self.graph[current].items(): 
-                new_cost = current_cost[current] + weight 
+            for neighbor in self.neighbors(current):
+                potential_path = known_score[current] + self.graph[current][neighbor]
 
-                if neighbor not in current_cost or new_cost < current_cost[neighbor]:
-                    current_cost[neighbor] = new_cost 
-                    priority = new_cost + self.heuristic(neighbor, goal)
-                    heapq.heappush(open_list, (priority, neighbor))
+                if potential_path < known_score[neighbor]:
                     came_from[neighbor] = current
+                    known_score[neighbor] = potential_path
+                    heuristic_score[neighbor] = potential_path + self.heuristic(neighbor, goal)
 
+                if neighbor not in open_set:
+                    open_set.add(neighbor)
         return None 
 
 
+
+    def construct_path(self, came_from, current):
+        path = [current]
+        while current in came_from:
+            current = came_from[current]
+            path.insert(0, current)
+        return path
+
     def heuristic(self, node, goal):
-        (x1, y1) = node
-        (x2, y2) = goal
-        return abs(x1 - x2) + abs(y1 - y2)
+        return 1
